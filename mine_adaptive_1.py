@@ -1,7 +1,7 @@
 from PIL import Image
 import pyautogui, time, random
 import pynput, keyboard, os
-import ctypes, pickle, webbrowser
+import ctypes, json, webbrowser
 
 
 
@@ -73,18 +73,25 @@ color_map = {
         }
 
 # color_map = pickle.load(open("color_map.p", "rb"))
+def file_handling(file, action, data=None):
+    if action == "read":
+        
+        with open(file, "r") as file:
+            return json.load(file)
+
+            
+    if action == "write":   
+        with open(file, "w") as file:
+            json.dump(data, file)
+
+
 
 def hex_to_rgb(hex_color):
     hex_color = hex_color.lstrip('#')
     return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
 
 # Function to check if a pixel is within the green range
-def is_green(pixel):
-    # Convert hex values to RGB format
-    green_min_rgb = hex_to_rgb(GREEN_MIN)
-    green_max_rgb = hex_to_rgb(GREEN_MAX)
-    # Check if the pixel's RGB values are within the green range
-    return all(green_min_rgb[i] <= pixel[i] <= green_max_rgb[i] for i in range(3))
+
 
 def get_color(pos, image):
     
