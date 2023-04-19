@@ -42,8 +42,6 @@ color_map = {
         }
 
 
-
-
 def file_handling(file, action, data=None):
     if action == "read":
         
@@ -55,3 +53,11 @@ def file_handling(file, action, data=None):
         with open(file, "w") as file:
             json.dump(data, file)
 
+
+
+def color_grid():
+    pass
+
+
+while True:
+    pass
