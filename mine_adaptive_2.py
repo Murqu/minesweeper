@@ -1,45 +1,7 @@
 import pyautogui, time
-import keyboard, PIL
+import keyboard, random
 import ctypes, json, webbrowser
-
-
-color_map = {
-        "1976D2": 1,
-        "1B77D1": 1,
-        "182633": 1,
-        "A7A8A6": 1,
-        "4284C5": 1,
-        "C9B491": 2,
-        "D6BD96": 2,
-        "D6B898": 2,
-        "E4C29E": 2,
-        "D75149": 3,
-        "D44F47": 3,
-        "D32F2F": 3,
-        "D3A7A0": 4,
-        "C89F9B": 4,
-        "E3BFA0": 4,
-        "D6B59A": 4,
-        "FF8F00": 5,
-        "119AA7": 6,
-        "0097A7": 6,
-        "AB957F": 7,
-        "B59C83": 7,
-        "E74E12": "flag",
-        "E64D11": "flag",
-        "EA5019": "flag",
-        "E74A0F": "flag",
-        "E5C29F": "empty",
-        "D7B899": "empty",
-        "AAD751": "unknown",
-        "A2D149": "unknown",
-        "AAD651": "unknown",
-        "A6CF4E": "unknown",
-        "A2D049": "unknown",
-        "A4D34B": "unknown",
-        "A6D44D": "unknown",
-        "A8D54F": "unknown",
-        }
+from PIL import Image
 
 
 def file_handling(file, action, data=None):
@@ -53,11 +15,176 @@ def file_handling(file, action, data=None):
         with open(file, "w") as file:
             json.dump(data, file)
 
+def get_image():
+    screenshot = pyautogui.screenshot()
+    image = Image.frombytes("RGB", screenshot.size, screenshot.tobytes())
+    return image
+
+def get_hex(image, pos):
+    return "{:02x}{:02x}{:02x}".format(*image.getpixel(pos)).upper()
+
+def wait_for_input(start_key):
+    """väntar tills startknappen är tryckt och läser sedan av färgen där musen var
+    !Viktigt: håll msuen över rutan högst up i vänstar hörnet"""
+    while True:
+        if keyboard.is_pressed(start_key.lower()):
+            pos = pyautogui.position()
+            pyautogui.moveTo(25, 25)
+            time.sleep(2)
+            return get_hex(get_image(), pos)
 
 
-def color_grid():
-    pass
 
 
-while True:
-    pass
+color_map = {}
+
+#hittar storleken på totala griden
+#hittar storleken på varje ruta
+def map_out_grid(start_color):
+    
+    # Tar bild, omvandlar bild till rgb värden.
+
+    image = get_image()
+    size = image.size
+    # tittar på alla pixlar tills någon matchar 
+    for i in range(size[0]):
+        for j in range(size[1]):
+            color = get_hex(image, (i, j))
+            
+            if color == start_color:
+                                   
+                left_corner = (i, j)
+                
+                break
+        else:       
+            continue
+        break
+
+    #räkna ut storleken på rutan
+    square_size = None
+    for i in range(200):
+
+        pos = left_corner[0] + i, left_corner[1]
+        color = get_hex(image, (pos))
+
+
+        if color != start_color:
+            square_size = i
+            second_color = color
+            break
+    
+    for i in [start_color, second_color]:
+        color_map[i] = "concealed"
+
+
+    #räkna ut antalet rutor 
+
+    #längd
+    for i in range(100):
+        pos = left_corner[0] + i*square_size, left_corner[1]
+        color = get_hex(image, (pos))
+
+        try:
+            color_map[color]
+        except:
+            total_square_size = i
+            break
+    
+    #höjd
+    for i in range(100):
+        pos = left_corner[0], left_corner[1] + i*square_size
+        color = get_hex(image, (pos))
+
+        try:
+            color_map[color]
+        except:
+            total_square_height = i
+            break
+
+    
+    all_squares = {}
+    #ta positione av alla rutors vänstra hörn
+    #gör detta tille en lista som sedan kan användas för att undersöka dem.
+    for i in range(total_square_size):
+        
+        for j in range(total_square_height):
+            pos = left_corner[0] + i*square_size, left_corner[1] + j*square_size
+
+
+            all_squares[pos] = "concealed"
+    
+
+
+    #extra för att starta spelet
+
+    start_postiton = random.choice(list(all_squares))
+    pyautogui.click(start_postiton)
+    pyautogui.moveTo(25, 25)
+    time.sleep(1)
+    image = get_image()
+
+    # hittar de rutor som inte är gröna längre och ger dem taggen pending
+    for pos in all_squares:
+        color = get_hex(image, pos)
+        try:
+            all_squares[pos] = color_map[color]
+        except:
+            all_squares[pos] = "pending"
+
+
+    for pos in all_squares:
+        color = get_hex(image, pos)
+        try:
+            color_map[color]
+        except:
+
+            if all_squares[pos] == "pending":
+
+                for i in range(square_size):
+                    for j in range(square_size):
+                        sqaure_pos = pos[0] + i, pos[1] + j
+                        temp_color = get_hex(image, sqaure_pos)
+
+                        if temp_color != color:
+                            break
+                    else:
+                        continue
+                    break
+                else:
+                    color_map[color] = "empty"
+                    all_squares[pos] = "empty"
+
+    print(color_map)
+
+    return all_squares
+
+
+
+
+
+def get_actions(all_squares, image):
+    """finds all possible actions from any given state"""
+    global square_size
+
+        
+
+    for pos in all_squares:
+        pass
+        #looking at all the pixels
+
+
+
+
+if __name__ == "__main__":
+
+    start_color = wait_for_input("q")
+
+    image = get_image()
+    
+    all_squares = map_out_grid(start_color)
+    #print(all_squares)
+    while True:
+        get_actions(all_squares, image)
+        break
+        screenshot = pyautogui.screenshot()
+        image = Image.frombytes("RGB", screenshot.size, screenshot.tobytes())
