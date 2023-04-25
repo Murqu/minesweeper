@@ -1,31 +1,13 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-import matplotlib.collections as coll
-import random
+from PIL import Image
 
-width = 1
-height = 1
-nrows = 20
-ncols = 24
-inbetween = 0
+# Load the image
+image = Image.open('image2.png')
 
-xx = np.arange(0, ncols, (width+inbetween))
-yy = np.arange(0, nrows, (height+inbetween))
+# Get all the unique colors in the image
+colors = set(image.getdata())
 
-fig = plt.figure()
-ax = plt.subplot(111, aspect="equal")
+# Convert each color to hexadecimal format
+hex_colors = [f'#{c[0]:02x}{c[1]:02x}{c[2]:02x}' for c in colors]
 
-pat = []
-for xi in xx:
-    for yi in yy:
-        sq = patches.Rectangle((xi, yi), width, height, fill=True, color=random.choice(["red", "green", "blue", "blue"]))
-        ax.add_patch(sq)
-
-pc = coll.PatchCollection(pat)
-ax.add_collection(pc)
-
-ax.relim()
-ax.autoscale_view()
-plt.axis('off')
-plt.show()
+# Print the hexadecimal colors
+print(hex_colors)

@@ -35,6 +35,22 @@ def wait_for_input(start_key):
 
 
 
+class grid_information():
+
+    def __init__(self, height, lenght, square_size, positions):
+
+        self.height = height
+        self.lenght = lenght
+        self.square_size = square_size
+        colors = []
+        for x in range(height*lenght):
+            colors.append("concealed")
+
+        self.colors = colors
+        self.color_map = color_map = {}
+        self.all_positions = positions
+
+
 
 color_map = {}
 
@@ -66,8 +82,8 @@ def map_out_grid(start_color):
 
         pos = left_corner[0] + i, left_corner[1]
         color = get_hex(image, (pos))
-
-
+        print(color)
+        pyautogui.moveTo(pos)
         if color != start_color:
             square_size = i
             second_color = color
@@ -83,7 +99,9 @@ def map_out_grid(start_color):
     for i in range(100):
         pos = left_corner[0] + i*square_size, left_corner[1]
         color = get_hex(image, (pos))
-
+        print(color)
+        pyautogui.moveTo(pos)
+        #time.sleep(1)
         try:
             color_map[color]
         except:
@@ -94,14 +112,14 @@ def map_out_grid(start_color):
     for i in range(100):
         pos = left_corner[0], left_corner[1] + i*square_size
         color = get_hex(image, (pos))
-
+        pyautogui.moveTo(pos)
         try:
             color_map[color]
         except:
             total_square_height = i
             break
 
-    
+
     all_squares = {}
     positions_list = []
     #ta positione av alla rutors vänstra hörn
@@ -136,31 +154,34 @@ def map_out_grid(start_color):
 
     for pos in all_squares:
         color = get_hex(image, pos)
-        try:
-            color_map[color]
-        except:
+        # try:
+        #     color_map[color]
+        # except:
 
-            if all_squares[pos] == "pending":
+        if all_squares[pos] == "pending":
 
-                for i in range(square_size):
-                    for j in range(square_size):
-                        sqaure_pos = pos[0] + i, pos[1] + j
-                        temp_color = get_hex(image, sqaure_pos)
+            for i in range(square_size):
+                for j in range(square_size):
+                    sqaure_pos = pos[0] + i, pos[1] + j
+                    temp_color = get_hex(image, sqaure_pos)
 
-                        if temp_color != color:
-                            break
-                    else:
-                        continue
-                    break
+                    if temp_color != color:
+                        break
                 else:
-                    color_map[color] = "empty"
-                    all_squares[pos] = "empty"
+                    continue
+                break
+            else:
+                color_map[color] = "empty"
+                all_squares[pos] = "empty"
 
-    
+    print(positions_list)
     temp_list = []
     for x in positions_list:
         temp_list.append(all_squares[x])
     display_grid(temp_list)
+
+
+    
 
     return all_squares
 
