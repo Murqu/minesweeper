@@ -181,7 +181,7 @@ def map_out_grid(start_color):
     display_grid(temp_list)
 
 
-    
+
 
     return all_squares
 
@@ -192,14 +192,15 @@ import tkinter as tk
 def display_grid(colors, window=None):
     # Calculate the total number of squares
     size = 20
-    rows = 24
-    columns = 20
+    rows = 10
+    columns = 8
     num_squares = rows * columns
     
-    for i,x in enumerate(colors):
+    for i, x in enumerate(colors):
 
         if x == "concealed":
             colors[i] = "green"
+                
         if x == "empty":
             colors[i] = "white"
         
