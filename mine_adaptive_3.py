@@ -1,7 +1,7 @@
 import pyautogui, time
-import keyboard, random
+import keyboard, random, os
 import ctypes, json, webbrowser
-from PIL import Image
+from PIL import Image, ImageTk
 import tkinter as tk
 
 
@@ -216,21 +216,24 @@ class grid_info():
         rows = self.length
         columns = self.height
         
-        for i,x in enumerate(colors):
+        # for i,x in enumerate(colors):
 
-            if x == "concealed":
-                colors[i] = "green"
-            if x == "empty":
-                colors[i] = "white"
+        #     if x == "concealed":
+        #         colors[i] = "dark green"
+        #     if x == "empty":
+        #         colors[i] = "white"
             
-            if colors[i] == "pending":
-                colors[i] = "gray"
+        #     if colors[i] == "pending":
+        #         colors[i] = "gray"
             
-            if colors[i] == "bomb":
-                colors[i] = "black"
+        #     if colors[i] == "bomb":
+        #         colors[i] = "black"
             
-            if colors[i] == 1:
-                colors[i] = "blue"
+        #     if colors[i] == 1:
+        #         colors[i] = "blue"
+            
+        #     if colors[i] == 2:
+        #         colors[i] = "light green"
 
 
         
@@ -246,13 +249,19 @@ class grid_info():
             for widget in window.winfo_children():
                 widget.destroy()
         
+
         # Create a grid of squares
         for i in range(rows):
             for j in range(columns):
                 index = i * columns + j
-                color = colors[index]
-                canvas = tk.Canvas(window, width=size, height=size, bg=color, highlightthickness=1, highlightcolor="black")
+                img_path = f"images/{colors[index]}.png"
+                img = Image.open(img_path)
+                img = img.resize((size, size))
+                photo = ImageTk.PhotoImage(img)
+                canvas = tk.Canvas(window, width=size, height=size, highlightthickness=0.5, highlightbackground="black")
                 canvas.grid(row=j, column=i)
+                canvas.create_image(0, 0, image=photo, anchor=tk.NW)
+                canvas.photo = photo
         
 
         window.update()
@@ -277,14 +286,15 @@ class grid_info():
 
 
             try:
-                #print("yes")
-                x1, y1 = pos
-                x2, y2 = self.offset[1]
-                pos_check = x1 + x2, y1 + y2
-                #print(get_hex(image, pos_check))
-                if color_map[get_hex(image, pos_check)] == 1:
-                    self.all_squares[pos] = 1
-                    #print(get_hex(image, pos_check))
+
+                for i in range(1, 9):
+                    x1, y1 = pos
+                    x2, y2 = self.offset[i]
+                    pos_check = x1 + x2, y1 + y2
+
+                    if color_map[get_hex(image, pos_check)] in [1, 2, 3, 4, 5, 6, 7, 8]:
+                        self.all_squares[pos] = color_map[get_hex(image, pos_check)]
+
             except:
                 pass
 
@@ -293,7 +303,10 @@ class grid_info():
             if color_pos[pos] == "pending":
                 surround_colors, surround_pixels = self.get_surround_squares(pos)
 
-                if (surround_colors.count("concealed") == 1 and surround_colors.count("bomb") == 0) or (surround_colors.count("concealed") == 0 and surround_colors.count("bomb") == 1):
+                concealed = surround_colors.count("concealed")
+                bombs = surround_colors.count("bomb")
+                outside = surround_colors.count("outside")
+                if (concealed == 1 and bombs == 0) or (concealed == 0 and bombs == 1):
                     try:
                         self.offset[1]
                         
@@ -322,7 +335,7 @@ class grid_info():
                                     color_map[color_temp]
 
                                 except:
-                                    print(color_temp)
+                                   # print(color_temp)
                                     self.all_squares[pos] = 1
                                     color_map[color_temp] = 1
                                     break
@@ -333,18 +346,63 @@ class grid_info():
                             break
 
 
+                #2or        
+                elif concealed + bombs == 2 and outside == 0:
+                    try:
+
+                        
+                        x, y = pos
+                        i, j = self.offset[2]
+                        position = (x + i, y + j)
+                        
+                        if color_map[get_hex(image, position)] == 2:
+                            self.all_squares[pos] = 2
+
+ 
+                    except:
+                        color = get_hex(image, pos)
+                        x, y = pos
+                        for i in range(self.square_size):
+                            for j in range(self.square_size):
+                                
+                                position = (x + i, y + j)
+                                color_temp = get_hex(image, position)
+                                self.offset[2] = i, j
+
+                                try:
+                                    color_map[color_temp]
+                                    
+                                except:
+
+                                    self.all_squares[pos] = 2
+                                    color_map[color_temp] = 2
+                                    break
+
+
+                            else:
+                                continue
+                            break
+                
+
+                if (surround_colors.count("concealed") == 0 and surround_colors.count("bomb") == 0):
+                    self.all_squares[pos] = "empty"
+
+
+
+
+
             if color_pos[pos] in [1, 2, 3, 4, 5, 6, 7, 8]:
 
                 surround_colors, surround_pixels = self.get_surround_squares(pos)
 
 
 
-                if surround_colors.count("concealed") - surround_colors.count("bomb") == color_pos[pos] and surround_colors.count("bomb") < color_pos[pos]:
+                if (surround_colors.count("concealed") - surround_colors.count("bomb") == color_pos[pos]) and (surround_colors.count("bomb") < color_pos[pos]):
                     
                     for i, color in enumerate(surround_colors):
                         if color == "concealed":
-                            pos = surround_pixels[i]
-                            self.all_squares[pos] = "bomb"
+                            position = surround_pixels[i]
+                            self.all_squares[position] = "bomb"
 
         return self 
                         
@@ -390,10 +448,11 @@ if __name__ == "__main__":
 
     grid.map_out_grid(first_color)
 
+    grid.display()
     
     image = get_image()
 
-    for x in range(8):
+    for x in range(10):
         
 
         grid.get_colors(image)
@@ -405,10 +464,10 @@ if __name__ == "__main__":
             grid.all_squares[pos] = "pending"
         pyautogui.moveTo(25, 25)
 
-        print(len(press_positions))
+        #print(len(press_positions))
         if len(press_positions) == 0:
-            time.sleep(0.5)
+            time.sleep(0.4)
             image = get_image()
+        grid.display()
 
         #break
-    grid.display()
