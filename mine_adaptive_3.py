@@ -330,7 +330,7 @@ class grid_info():
                     for key in color_map:
                         if color_map[key] == 1:
                             ones_defed += 1
-                    print(color_map)
+                    # print(color_map)
                     try:
 
                         
@@ -464,7 +464,7 @@ if __name__ == "__main__":
     
     image = get_image()
 
-    for x in range(10):
+    for x in range(100):
         
 
         grid.get_colors(image)
@@ -481,4 +481,3 @@ if __name__ == "__main__":
             image = get_image()
     grid.display()
 
-        #break
