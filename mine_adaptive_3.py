@@ -464,7 +464,7 @@ if __name__ == "__main__":
     
     image = get_image()
 
-    for x in range(100):
+    for x in range(10):
         
 
         grid.get_colors(image)
