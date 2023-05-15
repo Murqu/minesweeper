@@ -117,9 +117,9 @@ time.sleep(2)
 screenshot = pyautogui.screenshot()
     
 # Convert the screenshot to an image object
-img = Image.frombytes('RGB', screenshot.size, screenshot.tobytes())
+img = Image.frombytes('Hex', screenshot.size, screenshot.tobytes())
 
-
+print(get_color((0,0), img))
 
 
 #find top corner tile 

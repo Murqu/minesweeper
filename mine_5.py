@@ -252,7 +252,7 @@ while True:
                     quit()
                     
                 for pos in check_surrounding_pixels(pos, color_grid):
-
+                    
                     if color_grid[pos] != "flag":
                         
 
