@@ -178,9 +178,6 @@ class grid_info():
 
         return self
     
-
-
-
     def get_surround_squares(self, pos):
 
         x, y = pos
@@ -419,9 +416,6 @@ class grid_info():
 
         return self 
                         
-    
-
-
     def get_actions(self):
         
         
