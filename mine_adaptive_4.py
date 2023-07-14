@@ -41,9 +41,12 @@ def wait_for_input(start_key):
 
 class grid_info():
     def __init__(self) -> None:
-        # special offset for each number as a special identifier+
+        # special offset for each number as a special identifier
         
-        self.number_offsets = {}
+        # formatted as: (offset_x, offset_y, hexcolor):corresponding value
+
+        self.number_offsets = {} 
+
 
     def map_out_grid(self, start_color):
         """start color is the color of the leftmost square in the grid
@@ -136,13 +139,27 @@ class grid_info():
         all_squares = self.all_squares
 
         for pos in all_squares:
-            if all_squares[pos] == "concealed" or all_squares[pos] == "pending":
+            if all_squares[pos] == "concealed" and all_squares[pos] == "pending":
+                
+                offsets = self.number_offsets
 
-                pass
+                for values in offsets:
+                    
+                    # position realtive to chosen square top corner
+                    temp_pos = (pos[0]+values[0], pos[1]+values[1])
+
+                    # checking if the color matches
+                    color = get_hex(image, temp_pos)
+
+                    if color == values[2]:
+                        all_squares[pos] = offsets[values]
+                        break
+                    
 
 
 
-        
+
+
 
     def surround_squares(self, pos):
         """Gets the 8 surrounding squares and their colors

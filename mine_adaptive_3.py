@@ -163,7 +163,7 @@ class grid_info():
         self.square_size = square_size
         self.all_squares = all_squares
         
-        #hitta övergångsfärgen mellan gröna rutor och de meedd siffror
+        #hitta övergångsfärgen mellan gröna rutor och de med siffror
 
         for i, pos in enumerate(positions_list):
             if all_squares[positions_list[i]] == "pending" and all_squares[positions_list[i + 1]] == "concealed":
