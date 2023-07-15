@@ -20,7 +20,7 @@ def file_handling(file, action, data=None):
             json.dump(data, file)
 
 def get_image():
-    """Takes a screenshot of the image"""
+    """Takes a screenshot and returns an image"""
     screenshot = pyautogui.screenshot()
     image = Image.frombytes("RGB", screenshot.size, screenshot.tobytes())
     return image
@@ -132,31 +132,107 @@ class grid_info():
         self.square_size = square_size
 
     def update_grid(self):
-        """updates the grid using by taking a screenshot and checking each square"""
+        """updates the grid using by taking a screenshot and checking what has changed since the last update"""
 
         image = get_image()
 
         all_squares = self.all_squares
 
+
         for pos in all_squares:
-            if all_squares[pos] == "concealed" and all_squares[pos] == "pending":
+            # checking if the sqaure should be updated
+            if all_squares[pos] != "concealed" and all_squares[pos] != "pending":
+                continue
+            offsets = self.number_offsets
+
+            for values in offsets:
                 
-                offsets = self.number_offsets
+                # position realtive to chosen square top corner
+                temp_pos = (pos[0]+values[0], pos[1]+values[1])
 
-                for values in offsets:
-                    
-                    # position realtive to chosen square top corner
-                    temp_pos = (pos[0]+values[0], pos[1]+values[1])
+                # checking if the color matches
+                color = get_hex(image, temp_pos)
 
-                    # checking if the color matches
-                    color = get_hex(image, temp_pos)
+                if color == values[2]:
+                    all_squares[pos] = offsets[values]
+                    break
 
-                    if color == values[2]:
-                        all_squares[pos] = offsets[values]
-                        break
-                    
+            else:
+                # if none of the offsets match we check if its an empty square
+                
+                colors, square_pos = self.surround_squares(pos)
+
+                if colors.count("concealed") != 0:
+                    continue
+
+                all_squares[pos] == "empty"
+                square_color = get_hex(image, pos)
+                color_map[square_color] = "empty"
+
+    def first_press(self):
+        """function for the first press of the game
+        (only meant to be activated once)"""
 
 
+        # Clicks a random square on the grid and updates the grid
+        all_squares = self.all_squares
+        first_square = random.choice(all_squares)
+        pyautogui.click(first_square)
+        time.sleep(0.5)
+
+        
+        # Checks for the transition color that appears between the numbered squares and the concealed squares
+        # since it always appears in the corner we can check all corners on a numbered square to find it since no numbers reach the corner of the square
+        # This color gets named "irrelevant" in the program
+        image = get_image()
+        for pos in all_squares:
+
+            if all_squares[pos] != color_map[get_hex(image, pos)]:
+                all_squares[pos] = "pending"
+            else:
+                continue
+
+            x, y = pos
+            s = self.square_size
+
+
+            colors, square_pos = self.surround_squares(pos)
+
+            if colors.count("concealed") == 0:
+                all_squares[pos] = "empty"
+                color_map[get_hex(image, pos)] = "empty"
+
+
+
+            # Check to make sure both variations on the empty square have been found
+            temp_value = 0
+            for color in color_map:
+                
+                if color_map[color] != "empty":
+                    continue
+                temp_value += 1
+
+            if temp_value < 2:
+                continue
+            # Checking all four corners of the square
+            # Checking if the color is registered in the colormap
+            # if it is it's teh normal background color
+            # if it isn't it's the transition color 
+            four_corners = [(x, y)
+                            (x+s, y)
+                            (x, y+s)
+                            (x+s, y+s)]
+            
+            for test_pos in four_corners:
+
+                color = get_hex(image, test_pos)
+
+                try:                
+                    color_map[color]
+                except KeyError:
+                    color_map[color] = "irrelevant"
+
+            
 
 
 
@@ -164,9 +240,59 @@ class grid_info():
     def surround_squares(self, pos):
         """Gets the 8 surrounding squares and their colors
         pos: the position of the sqaure you want to look at"""
-        
+
+        x, y = pos
+        spacing = self.square_size
+        colors = self.all_squares
+
+        surrounding_pixels = [
+            (x-spacing, y-spacing), # top left
+            (x, y-spacing), # top
+            (x+spacing, y-spacing), # top right
+            (x-spacing, y), # left
+            (x+spacing, y), # right
+            (x-spacing, y+spacing), # bottom left
+            (x, y+spacing), # bottom
+            (x+spacing, y+spacing) # bottom right
+        ]
+        surrounding_colors = []
+        for pos in surrounding_pixels:
+            try:
+                surrounding_colors.append(colors[pos])
+            except KeyError:
+                surrounding_colors.append("outside")
+
+
+        return surrounding_colors, surrounding_pixels
+    
     def get_actions(self):
         """Get the possible actions from the given grid state"""
+
+        all_squares = self.all_squares
+
+        actions = []
+
+        for pos in all_squares:
+
+            if all_squares[pos] == "concealed" or all_squares[pos] == "empty":
+                continue
+
+            # the corresponding colors and position of the surrounding squares
+            colors, square_pos = self.surround_squares(pos)
+
+            if colors.count("concealed") != all_squares[pos]:
+                continue
+
+            for i, color in enumerate(colors):
+
+                if color != "concealed":
+                    continue
+                    
+                actions.append(square_pos[i])
+        
+        return actions
+
+
         
     def display(self):
         """Displays the current state of the grid the computer sees"""
@@ -216,11 +342,16 @@ if __name__ == "__main__":
 
     grid.map_out_grid(first_color)
     
-    
+
     while running:
-        
+
         # gui_thread.start()
+
+        # actions = grid.get_actions()
+        
         actions = grid.get_actions()
+
+        
 
         for pos in actions:
             
@@ -229,11 +360,10 @@ if __name__ == "__main__":
             time.sleep(0.4)
             # Square changes when clicked so gets assigned as "pending"
             grid.all_squares[pos] = "pending"
-        
-        
+            
+
         if len(actions) == 0:
             grid.update_grid()
 
         
-        
-        grid.display()
+        # grid.display()
