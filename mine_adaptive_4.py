@@ -141,8 +141,12 @@ class grid_info():
 
         for pos in all_squares:
             # checking if the sqaure should be updated
-            if all_squares[pos] != "concealed" and all_squares[pos] != "pending":
+            if all_squares[pos] != "concealed":
                 continue
+
+            if all_squares[pos] != "pending":
+                continue
+
             offsets = self.number_offsets
 
             for values in offsets:
@@ -162,13 +166,53 @@ class grid_info():
                 
                 colors, square_pos = self.surround_squares(pos)
 
-                if colors.count("concealed") != 0:
+                if colors.count("concealed") == 0:
+                    print("s")
+                    all_squares[pos] == "empty"
+                    square_color = get_hex(image, pos)
+                    color_map[square_color] = "empty"
                     continue
+                    
+                
+                # Cheking if it can get new information to the colormap 
+                # Runs through the possibel values on the squares and checks if the current number has the two different permutations saved
+                # If they have been saved then it continues
+                # If they haven't been saved it breaks the loop and checks if the square is eligible for the number
 
-                all_squares[pos] == "empty"
-                square_color = get_hex(image, pos)
-                color_map[square_color] = "empty"
+                for value in [1, 2, 3, 4, 5, 6, 7, 8]:
+                    
+                    counter = 0
+                    for color in color_map:
 
+                        if color_map[color] != value:
+                            continue
+                        
+                        counter += 1
+
+                        if counter < 2:
+                            current_number = value
+                            break
+
+                    else:
+                        continue
+
+                    
+                    if colors.count("concealed") == current_number:
+                        print("p")
+                        size = self.square_size
+                        all_squares[pos] = current_number
+                        x, y = pos
+                        for i in range(size):
+                            for j in range(size):
+                                temp_color = get_hex(image, (x+i, y+j))
+                                try:
+                                    color_map[temp_color]
+                                except KeyError:
+                                    self.number_offsets[(i, j, temp_color)] = current_number
+                    
+                    break
+
+                
     def first_press(self):
         """function for the first press of the game
         (only meant to be activated once)"""
@@ -176,32 +220,44 @@ class grid_info():
 
         # Clicks a random square on the grid and updates the grid
         all_squares = self.all_squares
-        first_square = random.choice(all_squares)
-        pyautogui.click(first_square)
-        time.sleep(0.5)
+
+        first_square = random.choice(list(all_squares.items()))
+        pyautogui.click(first_square[0])
+        pyautogui.moveTo(25, 25)
+        time.sleep(1)
 
         
         # Checks for the transition color that appears between the numbered squares and the concealed squares
         # since it always appears in the corner we can check all corners on a numbered square to find it since no numbers reach the corner of the square
         # This color gets named "irrelevant" in the program
         image = get_image()
-        for pos in all_squares:
 
-            if all_squares[pos] != color_map[get_hex(image, pos)]:
+        for pos in all_squares:
+            
+            # updating the squares that changed after the game started
+            try:
+                color_map[get_hex(image, pos)]
+
+            except KeyError:
+
                 all_squares[pos] = "pending"
-            else:
+
+        for pos in all_squares:
+            
+            if all_squares[pos] == "concealed":
                 continue
 
+            # updating the squares that changed after the game started
+
+            # finding the empty squares and updating the memory
             x, y = pos
             s = self.square_size
-
-
             colors, square_pos = self.surround_squares(pos)
-
             if colors.count("concealed") == 0:
+                # print("s")
                 all_squares[pos] = "empty"
                 color_map[get_hex(image, pos)] = "empty"
-
+                continue
 
 
             # Check to make sure both variations on the empty square have been found
@@ -214,14 +270,18 @@ class grid_info():
 
             if temp_value < 2:
                 continue
+
             # Checking all four corners of the square
             # Checking if the color is registered in the colormap
-            # if it is it's teh normal background color
+            # if it is it's the normal background color
             # if it isn't it's the transition color 
-            four_corners = [(x, y)
-                            (x+s, y)
-                            (x, y+s)
+            four_corners = [(x, y),
+                            (x+s, y),
+                            (x, y+s),
                             (x+s, y+s)]
+            
+            if all_squares[pos] == "empty":
+                continue
             
             for test_pos in four_corners:
 
@@ -231,12 +291,8 @@ class grid_info():
                     color_map[color]
                 except KeyError:
                     color_map[color] = "irrelevant"
-
+                    return
             
-
-
-
-
     def surround_squares(self, pos):
         """Gets the 8 surrounding squares and their colors
         pos: the position of the sqaure you want to look at"""
@@ -289,11 +345,9 @@ class grid_info():
                     continue
                     
                 actions.append(square_pos[i])
-        
+
         return actions
 
-
-        
     def display(self):
         """Displays the current state of the grid the computer sees"""
         # Create the main window
@@ -342,6 +396,7 @@ if __name__ == "__main__":
 
     grid.map_out_grid(first_color)
     
+    grid.first_press()
 
     while running:
 
