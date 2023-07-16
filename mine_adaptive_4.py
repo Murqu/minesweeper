@@ -140,75 +140,97 @@ class grid_info():
 
 
         for pos in all_squares:
-            # checking if the sqaure should be updated
-            if all_squares[pos] != "concealed":
-                continue
+            x, y = pos
 
-            if all_squares[pos] != "pending":
-                continue
+            square_color = all_squares[pos]
 
             offsets = self.number_offsets
 
+
+            # if square_color in [1, 2, 3, 4, 5, 6, 7, 8] or square_color == "empty":
+            #     continue
+
+
+            if color_map[get_hex(image, pos)] == "concealed":
+                continue
+            
+            
+            if square_color == "concealed" and color_map[get_hex(image, pos)] != "concealed":
+                self.all_squares[pos] = "pending"
+
+
+
             for values in offsets:
-                
+
+                i, j, offset_color = values
                 # position realtive to chosen square top corner
-                temp_pos = (pos[0]+values[0], pos[1]+values[1])
+                temp_pos = (x+i, y+j)
 
                 # checking if the color matches
                 color = get_hex(image, temp_pos)
-
-                if color == values[2]:
+                if color == offset_color:
                     all_squares[pos] = offsets[values]
+                    
                     break
 
             else:
                 # if none of the offsets match we check if its an empty square
                 
                 colors, square_pos = self.surround_squares(pos)
-
-                if colors.count("concealed") == 0:
-                    print("s")
-                    all_squares[pos] == "empty"
+                
+                if colors.count("concealed") == 0 and colors.count("bomb") == 0:
                     square_color = get_hex(image, pos)
                     color_map[square_color] = "empty"
+                    self.all_squares[pos] = "empty"
                     continue
-                    
                 
+                
+                
+
                 # Cheking if it can get new information to the colormap 
-                # Runs through the possibel values on the squares and checks if the current number has the two different permutations saved
+                # Runs through the possible values on the squares and checks if the current number has the two different permutations saved
                 # If they have been saved then it continues
                 # If they haven't been saved it breaks the loop and checks if the square is eligible for the number
+
+                
 
                 for value in [1, 2, 3, 4, 5, 6, 7, 8]:
                     
                     counter = 0
-                    for color in color_map:
 
-                        if color_map[color] != value:
+                    
+
+                    for color in offsets:
+
+                        if offsets[color] != value:
                             continue
                         
                         counter += 1
 
-                        if counter < 2:
-                            current_number = value
-                            break
+                    if counter < 2:
+                        current_number = value
 
                     else:
                         continue
 
-                    
-                    if colors.count("concealed") == current_number:
-                        print("p")
+                    if current_number != 1 and colors.count("bomb") == 0:
+                        continue 
+
+                    if colors.count("concealed") == current_number - colors.count("bomb"):
                         size = self.square_size
                         all_squares[pos] = current_number
-                        x, y = pos
                         for i in range(size):
                             for j in range(size):
                                 temp_color = get_hex(image, (x+i, y+j))
+
                                 try:
                                     color_map[temp_color]
                                 except KeyError:
                                     self.number_offsets[(i, j, temp_color)] = current_number
+                                    break
+                            else:
+                                continue
+                            break
                     
                     break
 
@@ -254,14 +276,15 @@ class grid_info():
             s = self.square_size
             colors, square_pos = self.surround_squares(pos)
             if colors.count("concealed") == 0:
-                # print("s")
-                all_squares[pos] = "empty"
+                
+                self.all_squares[pos] = "empty"
                 color_map[get_hex(image, pos)] = "empty"
                 continue
 
 
             # Check to make sure both variations on the empty square have been found
             temp_value = 0
+            all_squares = self.all_squares
             for color in color_map:
                 
                 if color_map[color] != "empty":
@@ -293,6 +316,8 @@ class grid_info():
                     color_map[color] = "irrelevant"
                     return
             
+
+
     def surround_squares(self, pos):
         """Gets the 8 surrounding squares and their colors
         pos: the position of the sqaure you want to look at"""
@@ -330,20 +355,43 @@ class grid_info():
 
         for pos in all_squares:
 
-            if all_squares[pos] == "concealed" or all_squares[pos] == "empty":
-                continue
+            square_color = all_squares[pos]
 
+            if square_color not in [1, 2, 3, 4, 5, 6, 7, 8]:
+                continue
             # the corresponding colors and position of the surrounding squares
             colors, square_pos = self.surround_squares(pos)
 
-            if colors.count("concealed") != all_squares[pos]:
+            if colors.count("concealed") != square_color - colors.count("bomb"):
+                continue
+                
+        
+
+            for i, color in enumerate(colors):
+
+                if color != "concealed":
+                    continue
+                
+                all_squares[square_pos[i]] = "bomb"
+                # pyautogui.rightClick(square_pos[i])
+
+
+        for pos in all_squares:
+
+            square_color = all_squares[pos]
+            if square_color not in [1, 2, 3, 4, 5, 6, 7, 8]:
+                continue
+
+            colors, square_pos = self.surround_squares(pos)
+
+            if colors.count("bomb") != square_color:
                 continue
 
             for i, color in enumerate(colors):
 
                 if color != "concealed":
                     continue
-                    
+                
                 actions.append(square_pos[i])
 
         return actions
@@ -378,7 +426,52 @@ class grid_info():
 
         # Run the main event loop
         window.mainloop()
+
+    def display_test(self, window=None):
+        while True:
+            # Calculate the total number of squares
+            colors = []
+            for x in self.positions:
+                colors.append(self.all_squares[x])
+            size = 20
+            rows = self.length
+            columns = self.height
+
     
+            if window is None:
+
+                # Create a new window
+                window = tk.Tk()
+                window.title("minesweeper brain")
+                window.attributes("-topmost", True)
+            
+            else:
+                # Remove the existing squares from the window
+                for widget in window.winfo_children():
+                    widget.destroy()
+            
+
+            # Create a grid of squares
+            for i in range(rows):
+                for j in range(columns):
+                    index = i * columns + j
+                    img_path = f"images/{colors[index]}.png"
+                    img = Image.open(img_path)
+                    img = img.resize((size, size))
+                    photo = ImageTk.PhotoImage(img)
+                    canvas = tk.Canvas(window, width=size, height=size, highlightthickness=0, highlightbackground="black")
+                    canvas.grid(row=j, column=i)
+                    canvas.create_image(0, 0, image=photo, anchor=tk.NW)
+                    canvas.photo = photo
+                    window.geometry(f"{size*rows}x{size*columns}+30+30")
+            
+
+            window.update()
+
+            # Run the window
+            # window.mainloop()
+
+        
 
 if __name__ == "__main__":
     
@@ -389,7 +482,7 @@ if __name__ == "__main__":
     
     grid = grid_info()
     
-    gui_thread = threading.Thread(target=grid.display)
+    gui_thread = threading.Thread(target=grid.display_test)
 
     # Define first color here
     first_color = wait_for_input("q")
@@ -398,9 +491,11 @@ if __name__ == "__main__":
     
     grid.first_press()
 
-    while running:
+    gui_thread.start()
 
-        # gui_thread.start()
+    updates_wo_clicks = 0
+
+    while running:
 
         # actions = grid.get_actions()
         
@@ -412,13 +507,29 @@ if __name__ == "__main__":
             
             pyautogui.click(pos)
             # slight delay to minimize chance of animations obstructing the game
-            time.sleep(0.4)
+            
             # Square changes when clicked so gets assigned as "pending"
             grid.all_squares[pos] = "pending"
-            
+        pyautogui.moveTo(25, 25)
 
         if len(actions) == 0:
+            time.sleep(1)
             grid.update_grid()
+            grid.update_grid()
+            print(grid.number_offsets)
+            updates_wo_clicks += 1
+
+        else:
+            updates_wo_clicks = 0
+
+
+        # if updates_wo_clicks > 3:
+
+        #     all_squares = grid.all_squares
+        #     position = random.choice(list(all_squares.items()))
+        #     pyautogui.click(position[0])
+        #     pyautogui.moveTo(25, 25)
+        #     updates_wo_clicks = 0
 
         
-        # grid.display()
+        # grid.display_test(0)
