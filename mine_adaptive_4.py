@@ -45,7 +45,8 @@ class grid_info():
         
         # formatted as: (offset_x, offset_y, hexcolor):corresponding value
 
-        self.number_offsets = {} 
+        self.number_offsets = {}
+        self.has_failed = False
 
 
     def map_out_grid(self, start_color):
@@ -150,9 +151,12 @@ class grid_info():
             # if square_color in [1, 2, 3, 4, 5, 6, 7, 8] or square_color == "empty":
             #     continue
 
-
-            if color_map[get_hex(image, pos)] == "concealed":
-                continue
+            try:
+                if color_map[get_hex(image, pos)] == "concealed":
+                    continue
+            except:
+                self.has_failed = True
+                return
             
             
             if square_color == "concealed" and color_map[get_hex(image, pos)] != "concealed":
@@ -233,8 +237,7 @@ class grid_info():
                             break
                     
                     break
-
-                
+             
     def first_press(self):
         """function for the first press of the game
         (only meant to be activated once)"""
@@ -316,8 +319,6 @@ class grid_info():
                     color_map[color] = "irrelevant"
                     return
             
-
-
     def surround_squares(self, pos):
         """Gets the 8 surrounding squares and their colors
         pos: the position of the sqaure you want to look at"""
@@ -455,7 +456,7 @@ class grid_info():
             for i in range(rows):
                 for j in range(columns):
                     index = i * columns + j
-                    img_path = f"images/{colors[index]}.png"
+                    img_path = f"images_2/{colors[index]}.png"
                     img = Image.open(img_path)
                     img = img.resize((size, size))
                     photo = ImageTk.PhotoImage(img)
@@ -484,52 +485,101 @@ if __name__ == "__main__":
     
     gui_thread = threading.Thread(target=grid.display_test)
 
+
+
+    
     # Define first color here
     first_color = wait_for_input("q")
 
-    grid.map_out_grid(first_color)
     
-    grid.first_press()
-
-    gui_thread.start()
-
-    updates_wo_clicks = 0
-
+    gui_started = False
+    has_failed = False
     while running:
 
-        # actions = grid.get_actions()
+        updates_wo_clicks = 0
         
-        actions = grid.get_actions()
-
         
 
-        for pos in actions:
+
+        if has_failed == True:
+            color_found = False
+            all_squares = grid.all_squares
+            time.sleep(0.5)
+            pyautogui.leftClick(list(all_squares.keys())[0])
+            while not color_found:
+                image = get_image()
+               
+                for pos in all_squares:
+                    if get_hex(image, pos) == "4A752C":
+                        pyautogui.click(pos)
+                        grid.has_failed = False
+                        color_found = True
+                        has_failed = False
+                        pyautogui.moveTo(25, 25)
+                        time.sleep(0.3)
+                        
+                        break
+                
+
+
+        grid.map_out_grid(first_color)
+        
+        grid.first_press()
+
+
+        if not gui_started:
+            gui_thread.start()  
+            gui_started = True
+        
+
+        updates_wo_clicks = 0
+
+
+        while not has_failed:
+
+            has_failed = grid.has_failed
+            if has_failed:
+                break
+
+            # actions = grid.get_actions()
             
-            pyautogui.click(pos)
-            # slight delay to minimize chance of animations obstructing the game
+            actions = grid.get_actions()
+
             
-            # Square changes when clicked so gets assigned as "pending"
-            grid.all_squares[pos] = "pending"
-        pyautogui.moveTo(25, 25)
 
-        if len(actions) == 0:
-            time.sleep(1)
-            grid.update_grid()
-            grid.update_grid()
-            print(grid.number_offsets)
-            updates_wo_clicks += 1
+            for pos in actions:
+                
+                pyautogui.click(pos)
+                # slight delay to minimize chance of animations obstructing the game
+                
+                # Square changes when clicked so gets assigned as "pending"
+                grid.all_squares[pos] = "pending"
 
-        else:
-            updates_wo_clicks = 0
+            pyautogui.moveTo(25, 25)
+
+            if len(actions) == 0:
+                time.sleep(0.7)
+                grid.update_grid()
+                grid.update_grid()
+                print(grid.number_offsets)
+                updates_wo_clicks += 1
+
+            else:
+                updates_wo_clicks = 0
+                
+                        
 
 
-        # if updates_wo_clicks > 3:
+            if updates_wo_clicks > 3:
 
-        #     all_squares = grid.all_squares
-        #     position = random.choice(list(all_squares.items()))
-        #     pyautogui.click(position[0])
-        #     pyautogui.moveTo(25, 25)
-        #     updates_wo_clicks = 0
+                click_list = []
+                
+                for pos in grid.all_squares:
 
-        
-        # grid.display_test(0)
+                    if grid.all_squares[pos] == "concealed":
+                        click_list.append(pos)
+                
+                pyautogui.click(random.choice(click_list))
+                updates_wo_clicks = 0
+
+            

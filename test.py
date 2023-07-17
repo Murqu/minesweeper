@@ -1,11 +1,8 @@
 
 
+how = {"yes":2, "how":3}
 
-yes = []
 
+noo = list(how.keys())[1]
 
-for x in yes:
-    pass
-
-else:
-    print("ss")
+print(noo)
