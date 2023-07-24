@@ -354,6 +354,9 @@ class grid_info():
 
         actions = []
 
+        #https://www.minesweeper.info/wiki/Strategy for further explanation of the strategies
+
+        #finding bombs
         for pos in all_squares:
 
             square_color = all_squares[pos]
@@ -363,20 +366,71 @@ class grid_info():
             # the corresponding colors and position of the surrounding squares
             colors, square_pos = self.surround_squares(pos)
 
-            if colors.count("concealed") != square_color - colors.count("bomb"):
-                continue
+
+            #basic pattern
+            if colors.count("concealed") == square_color - colors.count("bomb"):
+                for i, color in enumerate(colors):
+
+                    if color != "concealed":
+                        continue
+                    
+                    all_squares[square_pos[i]] = "bomb"
+                    # pyautogui.rightClick(square_pos[i])
+
+
+
+            #1-1 and 1-2 pattern
+            if square_color == 1:
+                pass
+
+            
+
+
+            #1-2-1 pattern
+            if square_color == 2 or square_color - colors.count("bomb") == 2:
+                
+                if colors.count("concealed") > 3:
+                    continue
+                
+                temp_list = []
+
+                for i, color in enumerate(colors):
+
+                    if color != "concealed":
+                        continue
+                    
+                    temp_list.append(square_pos[i])
+
+
+                val_1, val_2, val_3 = temp_list
+
+                #checking if the concealed squares are have the same x or y value
+                if val_1[0] == val_2[0] == val_3[0]:
+                    x_or_y = "x"
+
+                if val_1[1] == val_2[1] == val_3[1]:
+                    x_or_y = "ý"
+
+
+                if True:
+                    pass
+
+
+
+
+
+
+            #1-2-2-1 pattern
+
                 
         
 
-            for i, color in enumerate(colors):
-
-                if color != "concealed":
-                    continue
-                
-                all_squares[square_pos[i]] = "bomb"
-                # pyautogui.rightClick(square_pos[i])
+            
 
 
+
+
+        #Getting the actions
         for pos in all_squares:
 
             square_color = all_squares[pos]
