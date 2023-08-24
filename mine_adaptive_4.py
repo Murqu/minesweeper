@@ -488,14 +488,15 @@ if __name__ == "__main__":
 
 
     
-    # Define first color here
+    # Define first color herec
     first_color = wait_for_input("q")
 
     
     gui_started = False
     has_failed = False
     while running:
-
+        
+        
         updates_wo_clicks = 0
         
         
@@ -536,7 +537,10 @@ if __name__ == "__main__":
 
 
         while not has_failed:
-
+            
+            # print(grid.all_squares)
+            
+            
             has_failed = grid.has_failed
             if has_failed:
                 break
