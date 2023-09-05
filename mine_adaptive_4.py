@@ -1,4 +1,4 @@
-import pyautogui, keyboard
+import pyautogui, keyboard, os
 import time, random, threading
 import json, tkinter as tk
 from PIL import Image, ImageTk
@@ -23,9 +23,9 @@ def get_image(screen_region=(0, 0, 1920, 1080)):
     """Takes a screenshot and returns an image"""
     
     
+    number = len(os.listdir("screenshots")) + 1
     
-    
-    screenshot = pyautogui.screenshot("yes.png", region=screen_region)
+    screenshot = pyautogui.screenshot(f"screenshots/{number}.png", region=screen_region)
     image = Image.frombytes("RGB", screenshot.size, screenshot.tobytes())
     return image
 
@@ -640,7 +640,7 @@ if __name__ == "__main__":
             if len(actions) == 0:
                 time.sleep(0.7)
                 grid.update_grid()
-                grid.update_grid()
+                # grid.update_grid()
                 # print(grid.number_offsets)
                 updates_wo_clicks += 1
 
