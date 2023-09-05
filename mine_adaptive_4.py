@@ -19,9 +19,13 @@ def file_handling(file, action, data=None):
         with open(file, "w") as file:
             json.dump(data, file)
 
-def get_image():
+def get_image(screen_region=(0, 0, 1920, 1080)):
     """Takes a screenshot and returns an image"""
-    screenshot = pyautogui.screenshot()
+    
+    
+    
+    
+    screenshot = pyautogui.screenshot("yes.png", region=screen_region)
     image = Image.frombytes("RGB", screenshot.size, screenshot.tobytes())
     return image
 
@@ -380,14 +384,32 @@ class grid_info():
 
 
             #1-1 and 1-2 pattern
-            if square_color == 1:
-                pass
+            if square_color == 2:
+                
+                if colors.count("concealed") > 3:
+                    continue
+                
+                temp_list = []
+                
+                for i, color in enumerate(colors):
+                    
+                    if color != 1:
+                        continue
+                    
+                    temp_list.append(square_pos[i])
+                
+                for temp_pos in temp_list:
+                    pass
+                
+                
+                
+                    
 
             
 
 
             #1-2-1 pattern
-            if square_color == 2 or square_color - colors.count("bomb") == 2:
+            """ if square_color == 2 or square_color - colors.count("bomb") == 2:
                 
                 if colors.count("concealed") > 3:
                     continue
@@ -415,7 +437,7 @@ class grid_info():
                 if True:
                     pass
 
-
+ """
 
 
 
@@ -583,7 +605,7 @@ if __name__ == "__main__":
 
 
         if not gui_started:
-            gui_thread.start()  
+            # gui_thread.start()
             gui_started = True
         
 
@@ -619,15 +641,13 @@ if __name__ == "__main__":
                 time.sleep(0.7)
                 grid.update_grid()
                 grid.update_grid()
-                print(grid.number_offsets)
+                # print(grid.number_offsets)
                 updates_wo_clicks += 1
 
             else:
                 updates_wo_clicks = 0
                 
                         
-
-
             if updates_wo_clicks > 3:
 
                 click_list = []
