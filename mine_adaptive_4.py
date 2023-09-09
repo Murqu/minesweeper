@@ -1,7 +1,8 @@
 import pyautogui, keyboard, os
-import time, random, threading
+import time, random, threading, multiprocessing
 import json, tkinter as tk
 from PIL import Image, ImageTk
+from pynput.mouse import Controller, Button
 
 def file_handling(file, action, data=None):
     """Opens a json file and either reads it or writes new data to it
@@ -18,6 +19,16 @@ def file_handling(file, action, data=None):
     if action == "write":   
         with open(file, "w") as file:
             json.dump(data, file)
+            
+def click_position(x, y):
+    mouse = Controller()
+    mouse.position = (x, y)
+    mouse.click(Button.left, 1)
+
+# Function to simulate simultaneous mouse clicks at multiple positions using multiprocessing
+def multi_click(positions):
+    with multiprocessing.Pool() as pool:
+        pool.starmap(click_position, positions)
 
 def get_image(screen_region=(0, 0, 1920, 1080)):
     """Takes a screenshot and returns an image"""
@@ -25,7 +36,10 @@ def get_image(screen_region=(0, 0, 1920, 1080)):
     
     number = len(os.listdir("screenshots")) + 1
     
-    screenshot = pyautogui.screenshot(f"screenshots/{number}.png", region=screen_region)
+    # screenshot = pyautogui.screenshot(f"screenshots/{number}.png", region=screen_region)
+    screenshot = pyautogui.screenshot(region=screen_region)
+    
+    
     image = Image.frombytes("RGB", screenshot.size, screenshot.tobytes())
     return image
 
@@ -585,17 +599,20 @@ if __name__ == "__main__":
             pyautogui.leftClick(list(all_squares.keys())[0])
             while not color_found:
                 image = get_image()
-               
+                temp_list = []
                 for pos in all_squares:
                     if get_hex(image, pos) == "4A752C":
-                        pyautogui.click(pos)
-                        grid.has_failed = False
-                        color_found = True
-                        has_failed = False
-                        pyautogui.moveTo(25, 25)
-                        time.sleep(0.3)
+                        #  pyautogui.click(pos)
+                        temp_list.append(pos) 
+                    multi_click(temp_list)
+                    
+                    grid.has_failed = False
+                    color_found = True
+                    has_failed = False
+                    pyautogui.moveTo(25, 25)
+                    time.sleep(0.3)
                         
-                        break
+                    break
                 
 
 
