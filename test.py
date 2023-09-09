@@ -1,1 +1,2 @@
-import pyautogui
+import mouse
+mouse.click()
