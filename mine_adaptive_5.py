@@ -9,3 +9,8 @@ def click_positions(positions):
 
 if __name__ == "__main__":
     pass
+    
+    
+    
+    
+    
