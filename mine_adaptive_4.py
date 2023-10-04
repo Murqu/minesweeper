@@ -1,8 +1,15 @@
-import pyautogui, keyboard, os
+import pyautogui, keyboard, os, mouse
 import time, random, threading, multiprocessing
 import json, tkinter as tk
 from PIL import Image, ImageTk
 from pynput.mouse import Controller, Button
+
+
+def click_positions(positions):
+    """"""
+    for pos in positions:
+        mouse.move(pos[0], pos[1])
+        mouse.click()
 
 def file_handling(file, action, data=None):
     """Opens a json file and either reads it or writes new data to it
@@ -610,7 +617,7 @@ if __name__ == "__main__":
                     color_found = True
                     has_failed = False
                     pyautogui.moveTo(25, 25)
-                    time.sleep(0.3)
+                    time.sleep(0.25)
                         
                     break
                 

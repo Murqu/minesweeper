@@ -1,16 +1,23 @@
-import mouse
+import mine_adaptive_4 as mfunc
 
 
-def click_positions(positions):
-    for pos in positions:
-        mouse.move(pos[0], pos[1])
-        mouse.click()
+
 
 
 if __name__ == "__main__":
-    pass
+    
+    grid = mfunc.grid_info()
     
     
+    running = True
+    
+    grid.start()
+    while running:
+        
+        positions = grid.get_actions()
+        
+        mfunc.click_positions(positions)
+
     
     
     
