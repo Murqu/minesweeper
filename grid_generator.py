@@ -41,4 +41,30 @@ def generate_minesweeper_grid(width, height, mine_count):
     return grid
 
 
+def create_minesweeper_grid(rows, cols, num_mines):
+    # Initialize an empty grid filled with zeros
+    grid = [[0 for _ in range(cols)] for _ in range(rows)]
 
+    # Randomly place a portion of mines to ensure solvability
+    initial_mines = int(0.1 * rows * cols)  # 10% of the total cells
+    for _ in range(initial_mines):
+        row = random.randint(0, rows - 1)
+        col = random.randint(0, cols - 1)
+        grid[row][col] = -1  # Place a mine
+
+    # Calculate the number of remaining mines to place
+    remaining_mines = num_mines - initial_mines
+
+    # Randomly place the remaining mines while avoiding marked safe cells
+    while remaining_mines > 0:
+        row = random.randint(0, rows - 1)
+        col = random.randint(0, cols - 1)
+
+        # Check if the cell is already a mine or a marked safe cell
+        if grid[row][col] == -1 or grid[row][col] > 0:
+            continue
+
+        grid[row][col] = -1  # Place a mine
+        remaining_mines -= 1
+
+    return grid
