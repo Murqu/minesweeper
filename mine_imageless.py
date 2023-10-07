@@ -65,7 +65,7 @@ for temp_list in grid_mine_positions:
             temp_list[i] = 1
 
 
-print(len(grid_mine_positions))
+# print(len(grid_mine_positions))
 
 
 visual_list = []
@@ -79,33 +79,23 @@ for x in range(len(grid_mine_positions)):
         if value == 1:
             temp_list.append(-1)
             continue
-        
-        # Is top row
-        elif x == 0:
-            pass
-    
-        # Is Bottom row
-        elif x == len(grid_mine_positions) - 1:
-            pass
-        
-        # Is left egde
-        elif pos == 0:
-            pass
-        
-        # Is right edge
-        elif pos == len(grid_mine_positions[x]) - 1:
-            pass
             
-        else:
+        
             # General case
-            for i in range(x-1,x+2):
-                surround_value += grid_mine_positions[i][pos-1]
-                surround_value += grid_mine_positions[i][pos]
-                surround_value += grid_mine_positions[i][pos+1]
-            # Removing the middle value
+        for i in range(x-1,x+2):
             
-            pass
+            for j in range(pos-1, pos+2):
+                
+                if i == -1 or j == -1:
+                    continue
+                
+                try:
+                    surround_value += grid_mine_positions[i][j]
+                except IndexError:
+                    pass
+
         
+
         temp_list.append(surround_value)
         
         
