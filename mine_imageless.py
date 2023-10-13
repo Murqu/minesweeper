@@ -18,7 +18,7 @@ image_files = {-1:"-1.png",
 
 width = int(input("width: "))
 height = int(input("height: "))
-mine_count = (width*height) // 5
+mine_count = (width*height) * 0.2
 
 
 CELL_SIZE = 24
@@ -56,6 +56,17 @@ def display_minesweeper_grid_window(height, width, grid):
     root.mainloop()
 
 grid_mine_positions = gg.create_minesweeper_grid(height, width, mine_count)
+
+# writing to txt file
+with open("grid.txt", "a" ) as file:
+    for temp_list in grid_mine_positions:
+        temp_string = ""
+        for value in temp_list:
+            temp_string = f"{temp_string} {value}"
+
+        file.writelines(temp_string)
+    
+
 
 for temp_list in grid_mine_positions:
     
