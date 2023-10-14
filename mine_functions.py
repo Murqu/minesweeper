@@ -73,7 +73,8 @@ def display_minesweeper_game_sequence(boards):
     board_index = 0
 
     # Define cell size and gap
-    CELL_SIZE = 24
+    CELL_SIZE = 30
+    SCALE_SIZE = (CELL_SIZE, CELL_SIZE)
     GAP = 0
 
     screen_width = len(board[0]) * (CELL_SIZE + GAP)
@@ -83,9 +84,11 @@ def display_minesweeper_game_sequence(boards):
 
     # Load images
     
-    mine_image = pygame.image.load("images/-1.png")
-    revealed_image = pygame.image.load("images/0.png")
-    number_images = [pygame.image.load(f"images/{i}.png") for i in range(1, 9)]
+    mine_image = pygame.transform.scale(pygame.image.load("images/-1.png"), SCALE_SIZE)
+    revealed_image = pygame.transform.scale(pygame.image.load("images/0.png"), SCALE_SIZE)
+    number_images = [pygame.transform.scale(pygame.image.load(f"images/{i}.png"), SCALE_SIZE) for i in range(1, 9)]
+    concealed_image = pygame.transform.scale(pygame.image.load("images/concealed.png"), SCALE_SIZE)
+
 
     clock = pygame.time.Clock()
     playing = True
@@ -105,6 +108,8 @@ def display_minesweeper_game_sequence(boards):
 
                 if cell_value == -1:
                     screen.blit(mine_image, (x, y))
+                if cell_value == "c":
+                    screen.blit(concealed_image, (x, y))    
                 else:
                     if cell_value > 0:
                         number_image = number_images[cell_value - 1]
@@ -124,5 +129,18 @@ def display_minesweeper_game_sequence(boards):
 
     pygame.quit()
     sys.exit()
+
+
+def replace_all(arr, value):
+    if isinstance(arr, list):
+        for i in range(len(arr)):
+            arr[i] = replace_all(arr[i], value)
+    else:
+        return value
+    return arr
+
+
+
+
 
 
