@@ -11,27 +11,22 @@ mine_count = (width*height) * 0.2
 
 grid_mine_positions = mf.create_minesweeper_grid(height, width, mine_count, True)
 
-print(grid_mine_positions)
-
-
-grid_copy = grid_mine_positions
 
 
 
-grid_cover = mf.replace_all(grid_copy, "c")
+grid_cover = mf.replace_all(grid_mine_positions, "c")
 
-print(grid_mine_positions)
 
 game_sequence = []
 
-temp_list = grid_cover
-print(temp_list)
-for i in range(len(game_sequence)):
+for i in range(len(grid_mine_positions)):
     
-    for j in range(len(game_sequence[0])):
+    for j in range(len(grid_mine_positions[0])):
+        grid_cover[i][j] = grid_mine_positions[i][j]
+        print(grid_cover)
+
+        game_sequence.append(grid_cover)
         
-        temp_list[i][j] = grid_mine_positions[i][j]
-        game_sequence.append(temp_list)
 
 
 print(game_sequence)

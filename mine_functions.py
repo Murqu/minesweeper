@@ -133,12 +133,12 @@ def display_minesweeper_game_sequence(boards):
 
 def replace_all(arr, value):
     if isinstance(arr, list):
-        for i in range(len(arr)):
-            arr[i] = replace_all(arr[i], value)
+        new_arr = []
+        for item in arr:
+            new_arr.append(replace_all(item, value))
+        return new_arr
     else:
         return value
-    return arr
-
 
 
 
