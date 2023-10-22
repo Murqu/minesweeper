@@ -1,9 +1,3 @@
 
 
-yes = [2]
-
-
-yes.extend((3, 5))
-
-
-print(yes)
+print("500m 5.9305920502s")
