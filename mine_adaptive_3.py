@@ -3,7 +3,8 @@ import keyboard, random, os
 import ctypes, json, webbrowser
 from PIL import Image, ImageTk
 import tkinter as tk
-
+pyautogui.PAUSE = 0.0
+pyautogui.MINIMUM_DURATION = 0.0
 
 
 def file_handling(file, action, data=None):

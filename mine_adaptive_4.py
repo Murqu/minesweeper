@@ -5,6 +5,13 @@ from PIL import Image, ImageTk
 from pynput.mouse import Controller, Button
 
 
+# Make it faster or sum shit
+pyautogui.PAUSE = 0.0
+pyautogui.MINIMUM_DURATION = 0.0
+
+
+
+
 def click_positions(positions):
     """"""
     for pos in positions:
@@ -95,6 +102,11 @@ class grid_info():
             else:       
                 continue
             break
+
+
+        
+
+
         
         # calculates the size of the square
         for i in range(200):
@@ -662,7 +674,7 @@ if __name__ == "__main__":
             pyautogui.moveTo(25, 25)
 
             if len(actions) == 0:
-                time.sleep(0.7)
+                time.sleep(0.5)
                 grid.update_grid()
                 # grid.update_grid()
                 # print(grid.number_offsets)

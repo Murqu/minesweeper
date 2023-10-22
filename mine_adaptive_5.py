@@ -1,22 +1,20 @@
-import mine_adaptive_4 as mfunc
+import pyautogui
 
-
+# Makes it faster i guess
+pyautogui.PAUSE = 0.0
+pyautogui.MINIMUM_DURATION = 0.0
 
 
 
 if __name__ == "__main__":
     
-    grid = mfunc.grid_info()
     
     
     running = True
     
-    grid.start()
     while running:
         
-        positions = grid.get_actions()
-        
-        mfunc.click_positions(positions)
+        pass        
 
     
     
