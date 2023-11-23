@@ -286,7 +286,7 @@ class grid_info():
         first_square = random.choice(list(all_squares.items()))
         pyautogui.click(first_square[0])
         pyautogui.moveTo(25, 25)
-        time.sleep(1)
+        time.sleep(1.5)
 
         
         # Checks for the transition color that appears between the numbered squares and the concealed squares
@@ -674,7 +674,7 @@ if __name__ == "__main__":
             pyautogui.moveTo(25, 25)
 
             if len(actions) == 0:
-                time.sleep(0.5)
+                time.sleep(1.5)
                 grid.update_grid()
                 # grid.update_grid()
                 # print(grid.number_offsets)
