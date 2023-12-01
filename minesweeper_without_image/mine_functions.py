@@ -121,7 +121,7 @@ def display_minesweeper_game_sequence(boards):
 
         pygame.display.flip()
         clock.tick(10)  # Change the frame rate as needed
-
+        pygame.time.delay(500000)
         board_index += 1
         if board_index < len(boards):
             board = boards[board_index]
