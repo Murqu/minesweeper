@@ -1,6 +1,6 @@
 # https://scratch.mit.edu/projects/674167561/editor/ stolen art assets :)
 import pygame, sys, random, json
-
+from win32gui import SetWindowPos
 def create_minesweeper_grid(rows, cols, num_mines, advanced):
     # Initialize an empty grid filled with zeros
     """advanced variable makes the grid get all number in the grid"""
@@ -89,6 +89,20 @@ def display_minesweeper_game_sequence(boards):
     revealed_image = pygame.transform.scale(pygame.image.load("images/0.png"), SCALE_SIZE)
     number_images = [pygame.transform.scale(pygame.image.load(f"images/{i}.png"), SCALE_SIZE) for i in range(1, 9)]
     concealed_image = pygame.transform.scale(pygame.image.load("images/concealed.png"), SCALE_SIZE)
+    flag_image = pygame.transform.scale(pygame.image.load("images/flag.png"), SCALE_SIZE)
+    
+    win_w = (len(board))*CELL_SIZE
+    win_h = (len(board))*CELL_SIZE
+
+    x = round((pygame.display.Info().current_w - win_w) / 2)
+    y = round((pygame.display.Info().current_h - win_h) / 2 * 0.8)  # 80 % of the actual height
+
+    # pygame screen parameter for further use in code
+    screen = pygame.display.set_mode((win_w, win_h))
+
+    # Set window position center-screen and on top of other windows
+    # Here 2nd parameter (-1) is essential for putting window on top
+    SetWindowPos(pygame.display.get_wm_info()['window'], -1, x, y, 0, 0, 1)
 
 
     clock = pygame.time.Clock()
@@ -110,7 +124,9 @@ def display_minesweeper_game_sequence(boards):
                 if cell_value == -1:
                     screen.blit(mine_image, (x, y))
                 elif cell_value == "c":
-                    screen.blit(concealed_image, (x, y))    
+                    screen.blit(concealed_image, (x, y))
+                elif cell_value == "f":
+                    screen.blit(flag_image, (x, y))
                 else:
                     if cell_value > 0:
                         number_image = number_images[cell_value - 1]
@@ -120,13 +136,17 @@ def display_minesweeper_game_sequence(boards):
                     
 
         pygame.display.flip()
-        clock.tick(10)  # Change the frame rate as needed
-        pygame.time.delay(500000)
+        clock.tick(8)  # Change the frame rate as needed
+        # pygame.time.delay(500)
+        keys = pygame.key.get_pressed()
+        
         board_index += 1
         if board_index < len(boards):
             board = boards[board_index]
         else:
-            playing = False
+            board = boards[-1]
+        # pygame.time.delay(500)
+
 
     pygame.quit()
     sys.exit()
