@@ -48,7 +48,7 @@ def get_image(screen_region=(0, 0, 1920, 1080)):
     """Takes a screenshot and returns an image"""
     
     
-    number = len(os.listdir("screenshots")) + 1
+    # number = len(os.listdir("screenshots")) + 1
     
     # screenshot = pyautogui.screenshot(f"screenshots/{number}.png", region=screen_region)
     screenshot = pyautogui.screenshot(region=screen_region)
